@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Загрузка данных...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Arial Black', Impact, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      text-align: center;
+      padding: 15px;
+    }
+
+    /* Экран-ловушка для старта со звуком на телефонах */
+    #tap-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      cursor: pointer;
+    }
+    #tap-overlay h2 {
+      font-size: 24px;
+      color: #00ff66;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); opacity: 0.7; }
+    }
+
+    h1 {
+      font-size: clamp(26px, 7vw, 42px);
+      color: #ff0055;
+      text-shadow: 0 0 15px #ff0055;
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    .video-box {
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid #ff0055;
+      box-shadow: 0 0 25px rgba(255, 0, 85, 0.6);
+      background: #000;
+    }
+
+    video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    #stop-btn {
+      margin-top: 18px;
+      padding: 16px 36px;
+      font-size: 20px;
+      font-weight: 900;
+      color: #fff;
+      background: #ff2222;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+      transition: transform 0.1s;
+    }
+    #stop-btn:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Нажатие обходит запрет автовоспроизведения на iOS/Android -->
+  <div id="tap-overlay" onclick="startPrank()">
+    <h2>⚡ НАЖМИ, ЧТОБЫ ОТКРЫТЬ ⚡</h2>
+    <p style="color: #888; margin-top: 10px; font-size: 14px;">(секретный файл)</p>
+  </div>
+
+  <h1>ТЫ ЗАРИКРОЛЕН! 🕺</h1>
+
+  <div class="video-box">
+    <!-- Имя файла в точности как на скриншоте -->
+    <video id="troll-video" loop playsinline preload="auto">
+      <source src="ssstik.io_@emagjoke_7581553356724899079.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <button id="stop-btn" onclick="boostSound()">🛑 ОСТАНОВИТЬ 🛑</button>
+
+  <script>
+    const video = document.getElementById('troll-video');
+    const overlay = document.getElementById('tap-overlay');
+    const stopBtn = document.getElementById('stop-btn');
+
+    let audioCtx = null;
+    let gainNode = null;
+    let boostLevel = 1;
+
+    function startPrank() {
+      overlay.style.display = 'none';
+
+      // Настройка Web Audio API для усиления громкости выше 100%
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContext();
+      const source = audioCtx.createMediaElementSource(video);
+      gainNode = audioCtx.createGain();
+
+      source.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      video.volume = 1.0;
+      video.play();
+    }
+
+    function boostSound() {
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      // С каждым нажатием выкручиваем звук еще сильнее
+      boostLevel += 2.5;
+      if (gainNode) {
+        gainNode.gain.value = boostLevel;
+      }
+
+      // Небольшое ускорение видео для большего кринжа
+      video.playbackRate = Math.min(video.playbackRate + 0.15, 2.0);
+
+      // Меняем надпись на кнопке
+      const phrases = [
+        "НЕЛЬЗЯ ОСТАНОВИТЬ! 🔊",
+        "ЕЩЁ ГРОМЧЕ! 💀",
+        "ТАК И ЗАДУМАНО 😈",
+        "БАСБУСТ x" + Math.round(boostLevel)
+      ];
+      stopBtn.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+      stopBtn.style.background = "#ff0000";
+    }
+  </script>
+</body>
+</html>
